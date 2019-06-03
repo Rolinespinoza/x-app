@@ -1,6 +1,5 @@
 # services/users/project/tests/test_users.py
 
-
 import json
 import unittest
 
@@ -8,11 +7,13 @@ from project.tests.base import BaseTestCase
 from project import db
 from project.api.models import User
 
+
 def add_user(username, email):
-        user = User(username=username, email=email)
-        db.session.add(user)
-        db.session.commit()
-        return user
+    user = User(username=username, email=email)
+    db.session.add(user)
+    db.session.commit()
+    return user
+
 
 class TestUserService(BaseTestCase):
     """Tests para el servicio Users."""
@@ -25,23 +26,23 @@ class TestUserService(BaseTestCase):
         self.assertIn('pong!', data['message'])
         self.assertIn('success', data['status'])
 
-
     def test_add_user(self):
-        """Asegurando que un nuevo usuario pueda ser agregado a la base de datos."""
+        """Asegurando que un nuevo usuario pueda
+        ser agregado a la base de datos."""
         with self.client:
             response = self.client.post(
-            '/users',
-            data=json.dumps({ 
-                 'username': 'rolin',
-                 'email': 'rolinespinoza@upeu.edu.pe'
-            }),
-            content_type='application/json',
-
-        )
-        data = json.loads(response.data.decode())
-        self.assertEqual(response.status_code, 201)
-        self.assertIn('rolinespinoza@upeu.edu.pe ha sido agregado exitosamente', data['message'])
-        self.assertIn('success', data['status'])
+                '/users',
+                data=json.dumps({
+                    'username': 'rolin',
+                    'email': 'rolinespinoza@upeu.edu.pe'
+                }),
+                content_type='application/json',
+            )
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 201)
+            self.assertIn(
+                'rolinespinoza@upeu.edu.pe ha sido agregado!', data['message'])
+            self.assertIn('success', data['status'])
 
     def test_add_user_invalid_json(self):
         """Asegurando que se produzca un error si el objeto json está vacio."""
@@ -57,7 +58,8 @@ class TestUserService(BaseTestCase):
             self.assertIn('fallo', data['status'])
 
     def test_add_user_invalid_json_keys(self):
-        """Asegurando que se produzca un error si el objeto Json no tiene una clave username."""
+        """Asegurando que se produzca un error si el objeto Json
+        no tiene una clave username."""
         with self.client:
             response = self.client.post(
                 '/users',
@@ -75,40 +77,39 @@ class TestUserService(BaseTestCase):
         with self.client:
             self.client.post(
                 '/users',
-               data=json.dumps({
-                    'username' : 'rolin',
+                data=json.dumps({
+                    'username': 'rolin',
                     'email': 'rolinespinoza@upeu.edu.pe'
                 }),
                 content_type='application/json',
             )
             response = self.client.post(
                  '/users',
-                data=json.dumps({
-                    'username' : 'rolin',
+                 data=json.dumps({
+                    'username': 'rolin',
                     'email': 'rolinespinoza@upeu.edu.pe'
-                }),
-                content_type='application/json',
+                 }),
+                 content_type='application/json',
             )
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 400)
             self.assertIn('Lo siento. El email ya existe.', data['message'])
             self.assertIn('fallo', data['status'])
 
-
     def test_single_user(self):
         """Asegurando que se produzca un error si el email ya existe."""
-        user = add_user('rolin','rolinespinoza@upeu.edu.pe')
+        user = add_user('rolin', 'rolinespinoza@upeu.edu.pe')
         with self.client:
             response = self.client.get(f'/users/{user.id}')
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 200)
             self.assertIn('rolin', data['data']['username'])
-            self.assertIn('rolinespinoza@upeu.edu.pe',data['data']['email'])
+            self.assertIn('rolinespinoza@upeu.edu.pe', data['data']['email'])
             self.assertIn('success', data['status'])
 
-
     def test_single_user_no_id(self):
-        """Asegurando de que se arroje un error si no se proporciona una identificación."""
+        """Asegurando de que se arroje un error si
+        no se proporciona una identificación."""
         with self.client:
             response = self.client.get('/users/blah')
             data = json.loads(response.data.decode())
@@ -116,37 +117,36 @@ class TestUserService(BaseTestCase):
             self.assertIn('El usuario no existe', data['message'])
             self.assertIn('fallo', data['status'])
 
-
     def test_single_user_incorrect_id(self):
-        """Asegurando de que se arroje un error si no se proporciona una identificación no existe."""
+        """Asegurando de que se arroje un error si
+        no se proporciona una identificación no existe."""
         with self.client:
             response = self.client.get('users/999')
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 404)
             self.assertIn('El usuario no existe', data['message'])
-            self.assertIn('fallo',data['status'])
-    
-
+            self.assertIn('fallo', data['status'])
 
     def test_all_users(self):
         """Asegurando de que todos los usuarios se comporten correctamente"""
-        add_user('rolin','rolinespinoza@upeu.edu.pe')
-        add_user('jack','jackblack@gmail.com')
+        add_user('rolin', 'rolinespinoza@upeu.edu.pe')
+        add_user('jack', 'jackblack@gmail.com')
         with self.client:
-            response=self.client.get('/users')
-            data=json.loads(response.data.decode())
+            response = self.client.get('/users')
+            data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(data['data']['users']),2)
-            self.assertIn('rolin',data['data']['users'][0]['username'])
-            self.assertIn('rolinespinoza@upeu.edu.pe', data['data']['users'][0]['email'])
-            self.assertIn('jack',data['data']['users'][1]['username'])
-            self.assertIn('jackblack@gmail.com',data['data']['users'][1]['email'])
-            self.assertIn('success',data['status'])
-
+            self.assertEqual(len(data['data']['users']), 2)
+            self.assertIn('rolin', data['data']['users'][0]['username'])
+            self.assertIn(
+                'rolinespinoza@upeu.edu.pe', data['data']['users'][0]['email'])
+            self.assertIn('jack', data['data']['users'][1]['username'])
+            self.assertIn(
+                'jackblack@gmail.com', data['data']['users'][1]['email'])
+            self.assertIn('success', data['status'])
 
     def test_main_no_users(self):
-        """Asegurando que la ruta principal funcione correctamente cuando no hay usuarios
-        añadidos a la base de datos."""
+        """Asegurando que la ruta principal funcione correctamente
+        cuando no hay usuarios añadidos a la base de datos."""
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Todos los usuarios', response.data)
@@ -166,7 +166,8 @@ class TestUserService(BaseTestCase):
             self.assertIn(b'jack', response.data)
 
     def test_main_add_user(self):
-        """Asegurando que un nuevo usuario pueda ser agregado a la db mediante un POST request."""
+        """Asegurando que un nuevo usuario pueda ser agregado a la db
+         mediante un POST request."""
         with self.client:
             response = self.client.post(
                 '/',
@@ -179,8 +180,5 @@ class TestUserService(BaseTestCase):
             self.assertIn(b'rolin', response.data)
 
 
-
-
 if __name__ == '__main__':
     unittest.main()
-

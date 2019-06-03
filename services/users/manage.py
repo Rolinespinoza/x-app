@@ -5,7 +5,8 @@ import unittest
 import coverage
 from flask.cli import FlaskGroup
 
-from project import create_app, db  # new    
+from project import create_app
+from project import db  # new    
 from project.api.models import User # new
 
 COV = coverage.coverage(
